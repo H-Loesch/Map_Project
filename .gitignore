@@ -262,3 +262,7 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+/graph/targetver.h
+/graph/vector_version
+/graph/graph.vcxproj.filters
+/graph/graph.vcxproj
