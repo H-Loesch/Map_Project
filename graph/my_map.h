@@ -12,8 +12,8 @@ template <typename T, typename E>
 struct my_map
 {
 
-    class map_iter : public iterator<input_iterator_tag, T, E> //key_value<T,E> was replaced here with T, E. 
-    {															//dunno how that will affect things quite yet. Hopefully not at all?
+    class map_iter : public iterator<input_iterator_tag, T, E> 
+    {															
 
     /*Instead of using a prev_node vector, it would probably be much faster to store Has_Been_Visited within each node.
 	that way, checking on each node is only 1 operation, then at the end of whatever is needing to know if stuff has been 
@@ -25,7 +25,7 @@ struct my_map
 		Node<T, E>* node;
 		key_value<T, E>* shovel;
 
-        map_iter(Node<T, E>* x) :node(x){} //what does this MEAN...?
+        map_iter(Node<T, E>* x) :node(x){}  //these two may or may not work.
         map_iter(const map_iter& iter) : node(iter.node){}
 
 		map_iter& operator++() { //walking through this worked with the tree I tested with, will leave further testing for in-program.
@@ -129,7 +129,7 @@ struct my_map
 
     BTree<T, E> container; //our container friend C:
 
-    my_map() : container() { } //seriously what does this mean. Does this mean declaring a BTree with no inputs? Or what???
+    my_map() : container() { } 
     my_map(const my_map<T, E>& other);
     my_map<T, E>& operator=( const my_map<T, E>& other );
 
@@ -157,6 +157,8 @@ struct my_map
 		}
         return map_iter(current->right); //this'll just be nullptr. Is. Is that what we want...? I don't know...
     }
+
+	int null_function();
 };
 
 template <typename T, typename E>
@@ -166,16 +168,15 @@ ostream& operator<<(ostream& out, const my_map<T, E>& map)
 }
 
 //copy constructor
+//deep copy
 template <typename T, typename E>
-my_map<T,E>::my_map(const my_map<T, E>& other)
-    :   container(other.container)   
-{}
+my_map<T, E>::my_map(const my_map<T, E>& other) {
+	container = other.container; //binary tree's operator= should be able to handle this.
+}
 
-//copy assignment
 template <typename T, typename E>
-my_map<T, E>& my_map<T,E>::operator=( const my_map<T, E>& other )
-{
-    container(other.container);
+my_map<T, E>& my_map<T, E>::operator=(const my_map<T, E>& other) {
+	return other;
 }
 
 //return a reference to the key's value
@@ -190,10 +191,11 @@ E& my_map<T,E>::operator[](T search_key)
 	}
 	catch (std::runtime_error e) {
 		//if key does not exist, insert it.
-		target = container.insert(search_key, static_cast<E>(NULL)); //null SHOULD exist in all classes, right..? All the normal ones, at least... 
-	}																
-	return target->value; //this SHOULD return a reference to the value...
+		target = container.insert(search_key); //null SHOULD exist in all classes, right..? All the normal ones, at least... 
+	}									
+	return target->value;
 }
+
 
 template <typename T, typename E>
 Node<T, E>* my_map<T,E>::map_iter::find_next(Node<T, E>* curr)

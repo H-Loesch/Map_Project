@@ -34,7 +34,7 @@ string remove_punctuation(string& text)
 			result.push_back(*it);
 	}
 	text = result;
-	return result;
+	return text;
     /*std::string result;
     std::remove_copy_if(text.begin(), text.end(),            
                         std::back_inserter(result), //Store output           
@@ -49,11 +49,9 @@ my_map<string, double> create_freq_map(const string& text)
 	string theory;
 	while (!streaming.eof()) {
 		streaming >> theory;
-		freq_map[theory]++; //this will probably get a little messed up by the fact that the default value for int's is probably 32. 
-			//cuz that's what static_cast<int>(' ') gets converted to, I think.
+		freq_map[theory]++; 
 	}
-    //FINISH THIS FUNCTION
-    //this should find the frequecies of every word in the text
+	freq_map[theory]--; //last word in file is counted twice.
 
     return freq_map;
 }

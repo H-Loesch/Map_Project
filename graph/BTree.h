@@ -26,10 +26,16 @@ struct Node
     Node<T, E>* parent;
 
     int search_time;
-    color node_color; //don't need to worry about this for the regular BTree. thank god
+    color node_color; //not used in this implementation
 
-	
-    Node(T k = T(), E v = E(), bool vis = false, bool prv = false, Node<T,E>* l = NULL, Node<T,E>* r = NULL, Node<T,E>* p = NULL, color col = color::red)
+	Node() : key(T()), value(E()), visited(false), prev(false), left(NULL), right(NULL), parent(NULL), search_time(0), node_color(color::red) {}
+
+	//value can't be easily assigned a default value, so this constructor doesn't assign a value to it at all. Just has a key.
+	Node(T k, bool vis = false, bool prv = false, Node<T, E>* l = NULL, Node<T, E>* r = NULL, Node<T, E>* p = NULL, color col = color::red)
+		: key(k), visited(vis), prev(prv), left(l), right(r), parent(p), search_time(0), node_color(col) {}
+
+	//constructor which also assigns value.
+    Node(T k, E v, bool vis = false, bool prv = false, Node<T,E>* l = NULL, Node<T,E>* r = NULL, Node<T,E>* p = NULL, color col = color::red)
 		: key(k), value(v), visited(vis), prev(prv), left(l), right(r), parent(p), search_time(0), node_color(col) {}
 	//I just think it's more readable to make them be in a seperate thing, but maybe that's just me.
 
@@ -41,8 +47,8 @@ struct Node
 		search_time = other->search_time;
 	}
 
-	Node<T,E>* insertRight(T obj, E val, color colour);
-	Node<T,E>* insertLeft(T obj, E val, color colour);
+	Node<T,E>* insertRight(T obj, color colour);
+	Node<T,E>* insertLeft(T obj, color colour);
 
 	bool is_leaf(){return (left == 0 && right == 0);} //shouldn't these be == nullptr or smth?
 	bool operator!=(const Node<T, E> &r) { return key != r.key; }
@@ -61,18 +67,18 @@ struct Node
 	} //change to use function that checks the vector.
 };
 
-//creates and inserts a node to the right of the current. does NOT delete the old node, if any.
+//creates and inserts a node to the right of the current. does NOT delete the old node, if any. Node will have no value.
 template <typename T, typename E>
-Node<T,E>* Node<T,E>::insertRight(T obj, E val, color colour) { 
-	this->right = new Node<T, E>(obj, val, false, false, NULL, NULL, NULL, red);
+Node<T,E>* Node<T,E>::insertRight(T obj, color colour) { 
+	this->right = new Node<T, E>(obj, false, false, NULL, NULL, NULL, colour);
 	this->right->parent = this;
 	return this->right;
 }
 
-// creates and inserts a node to the left of the current. does NOT delete the old node, if any.
+// creates and inserts a node to the left of the current. does NOT delete the old node, if any. Node will have no value.
 template <typename T, typename E> 
-Node<T,E>* Node<T,E>::insertLeft(T obj, E val, color colour) {
-	this->left = new Node<T,E>(obj, val, false, false, NULL, NULL, NULL, colour);
+Node<T,E>* Node<T,E>::insertLeft(T obj, color colour) {
+	this->left = new Node<T,E>(obj, false, false, NULL, NULL, NULL, colour);
 	this->left->parent = this;
 	return this->left;
 }
@@ -110,6 +116,7 @@ public:
 
 	Node<T,E>* get_root(){return root;}
 	const Node<T,E>* get_root() const {return root;} 
+	virtual Node<T, E>* insert(T obj);
 	virtual Node<T,E>* insert(T obj, E val);
 	Node<T,E>* search(T obj);
 	void update_search_times();
@@ -124,7 +131,7 @@ public:
 
 private:
 	void copy_helper(Node<T,E>* copy_to, const Node<T,E>* copy_from) const;
-	virtual Node<T,E>* insert_helper(T obj, E val, Node<T,E>* node); //carries the value with it. Probably inefficient, but whatever.
+	virtual Node<T,E>* insert_helper(T obj, Node<T,E>* node); //carries the value with it. Probably inefficient, but whatever.
 	Node<T,E>* search_helper(T obj, Node<T,E>* node);
 	ostream& inorder_helper(ostream& out, Node<T,E>* node);
 	void update_search_times_helper(Node<T,E>* node, int depth);
@@ -212,7 +219,6 @@ BTree<T, E>& BTree<T, E>::operator=(const BTree<T, E>& other)
 	}
 	size = other.size;
 	depth = other.depth;
-	root = new Node<T,E>;
 	copy_helper(root, other.get_root()); //copy_helper SHOULD be able to handle this... right?
 	/*
 		complete this assignment operator
@@ -232,6 +238,7 @@ void BTree<T, E>::copy_helper(Node<T,E>* copy_to, const Node<T,E>* copy_from) co
 	copy_to->key = copy_from->key;
 	copy_to->node_color = copy_from->node_color;
 	copy_to->search_time = copy_from->search_time;
+	copy_to->value = copy_from->value;
 
 	//if copy_from is not nullptr
 	if (copy_from->left != nullptr) { //copy_from isn't nullptr
@@ -278,40 +285,50 @@ void delete_rec(Node<T,E>* node) {
 	delete node;
 }
 
+//basic function for insertion of nodes into binary tree.
 template <typename T, typename E>
-Node<T,E>* BTree<T, E>::insert(T obj, E val) 
+Node<T, E>* BTree<T, E>::insert(T obj)
 {
-	//E doesn't need a default value, since having a node without a value is pointless. Duh!
 	size += 1;
 	if (this->get_root() == NULL) { //if empty, create node at root.
-		root = new Node<T,E>(obj, val); 
+		root = new Node<T, E>(obj);
 		root->search_time = 1;
 		return root;
 	}
-	Node<T,E>* out = insert_helper(obj, val, get_root()); //search_time is not updated at time of creation so that that feature can be easily removed if needed.
-	out->search_time = search_time_single_update(obj); 
+	Node<T, E>* out = insert_helper(obj, get_root()); //search_time is not updated at time of creation so that that feature can be easily removed if needed.
+	out->search_time = search_time_single_update(obj);
 	if (out->search_time > depth) {
 		depth = out->search_time;
 	}
 	return out;
 }
 
+//insertion function which also assigns value.
 template <typename T, typename E>
-Node<T,E>* BTree<T, E>::insert_helper(T obj, E val, Node<T,E>* donk) {
-	if (obj > donk->key) {//if obj is bigger than current's key, go to right.
-		if (donk->right == nullptr) {  //if right doesn't exist, make it exist using obj
-			return donk->insertRight(obj, val, red);
+Node<T,E>* BTree<T, E>::insert(T obj, E val) 
+{
+	Node<T, E>* out = insert(obj);
+	out->value = val;
+	return out;
+}
+
+//helper function for the insert node function.
+template <typename T, typename E>
+Node<T,E>* BTree<T, E>::insert_helper(T obj, Node<T,E>* working) {
+	if (obj > working->key) {//if obj is bigger than current's key, go to right.
+		if (working->right == nullptr) {  //if right doesn't exist, make it exist using obj
+			return working->insertRight(obj, red);
 		}
 		else { //else go to left
-			return insert_helper(obj, val, donk->right); //this COULD not have brackets on it. But I'm here for order and predictability, not minimizing space
+			return insert_helper(obj, working->right); //this COULD not have brackets on it. But I'm here for order and predictability, not minimizing space
 		}
 	}
 	else {
-		if (donk->left == nullptr) {
-			return donk->insertLeft(obj, val, red);
+		if (working->left == nullptr) {
+			return working->insertLeft(obj, red);
 		}
 		else {
-			return insert_helper(obj, val, donk->left);
+			return insert_helper(obj, working->left);
 		}
 	}
 } //seems to work okay. Should probably get searchValue included in here sometime.
