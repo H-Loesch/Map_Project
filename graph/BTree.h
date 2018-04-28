@@ -16,6 +16,7 @@ enum color {red, black};
 template <typename T, typename E>
 struct Node
 {
+	//all members of object are public.
 	T key;
 	E value; //this SHOULD work.
 	bool visited; //keeps track of if node has been visited by an in-order for the graph.
@@ -44,17 +45,23 @@ struct Node
 	Node<T,E>* insertLeft(T obj, E val, color colour);
 
 	bool is_leaf(){return (left == 0 && right == 0);} //shouldn't these be == nullptr or smth?
-	bool operator!=(const Node<T, E> &r) { return key != r.key; } //I don't honestly know why these didn't work when they were outside the body. 
-	bool operator==(const Node<T, E> &r) { return key == r.key; } //but they work now, so whatever.
+	bool operator!=(const Node<T, E> &r) { return key != r.key; }
+	bool operator==(const Node<T, E> &r) { return key == r.key; } 
 	bool operator< (const Node<T, E> &r) { return key < r.key; }
 	bool operator<=(const Node<T, E> &r) { return key <= r.key; }
 	bool operator> (const Node<T, E> &r) { return key > r.key; }
 	bool operator>=(const Node<T, E> &r) { return key >= r.key; }
 	
+	bool no_visit() {
+		if (this == nullptr) //one-line implementation with && still tried to read prev from a nullptr, thus this.
+			return true;
+		if (this->prev)
+			return true;
+		return false;
+	} //change to use function that checks the vector.
 };
 
 //creates and inserts a node to the right of the current. does NOT delete the old node, if any.
-//this is the tree-level insert, so it can't actually do values. For now, at least?
 template <typename T, typename E>
 Node<T,E>* Node<T,E>::insertRight(T obj, E val, color colour) { 
 	this->right = new Node<T, E>(obj, val, false, false, NULL, NULL, NULL, red);
@@ -63,7 +70,6 @@ Node<T,E>* Node<T,E>::insertRight(T obj, E val, color colour) {
 }
 
 // creates and inserts a node to the left of the current. does NOT delete the old node, if any.
-//okay why in god's name does it not delete the old node. I'm not testing it, but why.
 template <typename T, typename E> 
 Node<T,E>* Node<T,E>::insertLeft(T obj, E val, color colour) {
 	this->left = new Node<T,E>(obj, val, false, false, NULL, NULL, NULL, colour);

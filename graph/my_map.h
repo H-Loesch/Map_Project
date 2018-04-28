@@ -29,16 +29,19 @@ struct my_map
         map_iter(const map_iter& iter) : node(iter.node){}
 
 		map_iter& operator++() { //walking through this worked with the tree I tested with, will leave further testing for in-program.
-			if (node->left == nullptr && node->right == nullptr && node->parent == nullptr)
+			if (node == nullptr) {
+				throw std::runtime_error("Iterator out of range."); // error message text?
+			}
+			if (node->left->no_visit() && node->right->no_visit() && node->parent == nullptr)
 				//if node is only one in the tree, then skip right to end()
 				node = node->right;
-			else if ((node->right == nullptr || node->right->prev) && (node->left == nullptr || node->left->prev)) {
+			else if (node->right->no_visit() && node->left->no_visit()) {
 				//if neither child exists and is unvisited
 				if (node->parent->right == node){
 					//if current is right child of its parent
 					node->prev = true;
 					//this while() should also catch if the current node is unvisited, since it should be impossible for the current to be unvisited and the right be visited)
-					while (node->prev && (node->parent != nullptr) && (node->right == nullptr || node->right->prev) && (node->left == nullptr || node->left->prev)) {
+					while (node->prev && (node->parent != nullptr) && (node->right->no_visit() && node->left->no_visit())) {
 						//if both children unavailable, parent exists, and current.prev==true
 						//then set children's .prev to false, and node = node->parent
 						if (node->left != nullptr)
@@ -74,7 +77,7 @@ struct my_map
 					node = node->parent;
 				}
 			}
-			else if (node->left == nullptr || node->left->prev == true) {
+			else if (node->left->no_visit()) {
 				//if left is visited or does not exist...
 				if (node->right != nullptr) {
 					//if right exists, go there.
@@ -86,7 +89,7 @@ struct my_map
 					}
 				}
 				else {
-					// //if right doesn't exist, go up.
+					// //if right doesn't exist or is visited, go up.
 					node->left->prev = false;
 					node->prev = true;
 					node = node->parent;
@@ -96,15 +99,15 @@ struct my_map
 		}
 
 
-		map_iter operator+(int times) {
+		map_iter operator+(int times) { //just run iterate (input) amount of times.
 			map_iter tmp = *this;
 			for (int i = 0; i < times; i++)
-				tmp++;
-			swap(*this, tmp);
+				(*this)++;
 			return *this;
 		}
         bool operator==(const map_iter& rhs) const {return node == rhs.node;}
         bool operator!=(const map_iter& rhs) const {return node != rhs.node;} 
+
 		key_value<T, E>& operator*() { 
 			//so. basically. this just. assigns the values from the current node to the memory pointed to by the shovel attribute
 			//then returns said shovel attribute
