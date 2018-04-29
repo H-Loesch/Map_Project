@@ -29,9 +29,15 @@ string read_file(string file_name)
 string remove_punctuation(string& text)
 {
 	std::string result = "";
-	for (std::string::iterator it = text.begin(); it != text.end(); ++it) {
-		if (!ispunct(*it))
-			result.push_back(*it);
+	char charred;
+	for (auto it = text.begin(); it != text.end(); ++it) {
+		charred = *it;
+		if (charred < 0 || charred > 255) {
+			//some more complicated unicode characters break this.
+			charred = 0;
+		}
+		if (!ispunct(charred))
+			result.push_back(charred);
 	}
 	text = result;
 	return result;

@@ -230,6 +230,7 @@ void BTree<T, E>::copy_helper(Node<T,E>* copy_to, const Node<T,E>* copy_from) co
 {
 	//these being first SHOULDN'T be a problem, since this'll hopefully only get called on things known to not be null
 	copy_to->key = copy_from->key;
+	copy_to->value = copy_from->value;
 	copy_to->node_color = copy_from->node_color;
 	copy_to->search_time = copy_from->search_time;
 

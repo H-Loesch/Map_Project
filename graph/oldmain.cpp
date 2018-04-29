@@ -10,12 +10,11 @@ using namespace std;
 int main()
 {
 	BTree<int, string> dingus;
-	dingus.insert(21, "fuck");
+	dingus.insert(21, "whoa");
 	ofstream outDonk;
 	BTree<int, int> donk;
 	donk = read_file<int, int>("1r");
 	outDonk.open("1rout.txt");
-	std::cout << "FUCK";
 	donk.print_level_by_level(outDonk);
 	outDonk.close();
 
@@ -97,8 +96,3 @@ BTree<T, E> read_file(string file_name) // oh okay
     */
     return newTree;
 }
-
-//TODO: total and average search time
-//figure out why we have two assignment operators??? commenting one of them out for now.
-//total search time works, but got it's starting to bother me how insert doesn't just update the things itself, and uses a thing instead. pointless.
-//fix the insert function (make a second, good one)

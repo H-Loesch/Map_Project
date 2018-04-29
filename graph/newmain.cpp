@@ -5,10 +5,7 @@
 
 int main()
 {
-	string stringus = read_file("test_text_small1.txt");
-	my_map<string, int> m;
-	remove_punctuation(stringus);
-	my_map<string, double> warble = create_freq_map(stringus);
+	/* old test code (tree iteration)
 	int warbus = static_cast<int>(NULL) + 5;
 	m["a"] = 10;
 	m["hh"] = 3;
@@ -31,16 +28,36 @@ int main()
 
 	while (curr != m.end())
 	{
+	cout << *curr << endl;
+	curr + 2;
+	}*/
+
+	string stringus = read_file("TFOTR_new.txt");
+	my_map<string, int> m;
+	remove_punctuation(stringus);
+	my_map<string, double> warble = create_freq_map(stringus); //SEEMS to work...?
+	auto curr = warble.begin();
+	my_map<double, string> inorder;
+	while (curr != warble.end())
+	{
+		key_value<string, double> temp = *curr;
+		inorder[temp.value] = temp.key;
 		cout << *curr << endl;
-		curr + 2;
+		curr++;
 	}
+	auto whoa = inorder.begin();
+	while (whoa != inorder.end()) {
+		cout << *whoa << endl;
+		whoa++;
+	}
+	
 	return 0;
 }
 
 /*TODO
 add an error for same keys
 
-implement vector-storage for the nodes
+store visited nodes in the iterator's members instead of the nodes: storing in nodes is more complicated than needed.
 
 remove key-value class
 
@@ -48,14 +65,10 @@ remove shovel member from node class.
 
 Clean up commenting on operator++ function?
 
+create operator<< for maps.
+
 stuff taken from the handout for this assignment:
 put tree traversal code into a helper function for operator++, or at least divide it into sub-functions.
-
-reading text file into string
-
-remove punctuation
-
-count number of word occurences, store in map
 
 vectorize_map function
 
@@ -67,8 +80,7 @@ make sure destructors are working okay (no memory leaks).
 
 
 /* current changes
-fixed bug with tree traversal (root being final node caused exception)
-implemented novisit() function for nodes (combines is_nullptr and is_visited)
-removed copy-and-swap from the iterator + int function, since it wasn't needed.
-iterator + int function tested lightly, works fine. Will throw out_of_range exceptions sometimes, but that's by intent actually.
+Reading text file from string
+removing puncutation
+storing number of word occurrences in map
 */

@@ -179,7 +179,7 @@ my_map<T, E>& my_map<T,E>::operator=( const my_map<T, E>& other )
 }
 
 //return a reference to the key's value
-//if key doesn't exist yet, create a node with that key, insert it, then return it's value.
+//if key doesn't exist yet, create a node with that key, insert it, then return its value.
 template <typename T, typename E>
 E& my_map<T,E>::operator[](T search_key)
 {
