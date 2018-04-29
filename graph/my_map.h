@@ -191,9 +191,9 @@ E& my_map<T,E>::operator[](T search_key)
 	}
 	catch (std::runtime_error e) {
 		//if key does not exist, insert it.
-		target = container.insert(search_key); //null SHOULD exist in all classes, right..? All the normal ones, at least... 
-	}									
-	return target->value;
+		target = container.insert(search_key, E()); //default constructor object will work for all classes which aren't so weird as to be unusable.
+	}																
+	return target->value; 
 }
 
 
